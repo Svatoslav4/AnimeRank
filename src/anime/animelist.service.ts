@@ -98,10 +98,7 @@ export class AnilistService {
     }
 
     const safePage = Math.max(1, Math.floor(page) || 1);
-    const safeLimit = Math.min(
-      50,
-      Math.max(1, Math.floor(perPage) || 10),
-    );
+    const safeLimit = Math.min(50, Math.max(1, Math.floor(perPage) || 10));
 
     const result = await this.request<{
       Page: {
@@ -122,9 +119,7 @@ export class AnilistService {
     const pageInfo = result.Page.pageInfo;
 
     return {
-      items: result.Page.media.map((media) =>
-        this.toAnimeData(media),
-      ),
+      items: result.Page.media.map((media) => this.toAnimeData(media)),
       pagination: {
         page: pageInfo.currentPage,
         limit: safeLimit,
@@ -154,18 +149,11 @@ export class AnilistService {
 
     const data = this.toAnimeData(media);
 
-    try {
-      return await this.prisma.anime.upsert({
-        where: {
-          anilistId: media.id,
-        },
-        create: data,
-        update: data,
-      });
-    } catch (error) {
-      console.error('Prisma anime import error:', error);
-      throw error;
-    }
+    return this.prisma.anime.upsert({
+      where: { anilistId: media.id },
+      create: data,
+      update: data,
+    });
   }
 
   private toAnimeData(media: AniListMedia) {
@@ -190,49 +178,35 @@ export class AnilistService {
     };
   }
 
-  private mapAnimeStatus(
-    status?: string | null,
-  ): AnimeStatus | null {
+  private mapAnimeStatus(status?: string | null): AnimeStatus | null {
     switch (status) {
       case 'RELEASING':
         return AnimeStatus.AIRING;
-
       case 'FINISHED':
         return AnimeStatus.FINISHED;
-
       case 'NOT_YET_RELEASED':
         return AnimeStatus.NOT_YET_RELEASED;
-
       default:
         return null;
     }
   }
 
-  private mapAnimeFormat(
-    format?: string | null,
-  ): AnimeFormat | null {
+  private mapAnimeFormat(format?: string | null): AnimeFormat | null {
     switch (format) {
       case 'TV':
         return AnimeFormat.TV;
-
       case 'TV_SHORT':
         return AnimeFormat.TV_SHORT;
-
       case 'MOVIE':
         return AnimeFormat.MOVIE;
-
       case 'SPECIAL':
         return AnimeFormat.SPECIAL;
-
       case 'OVA':
         return AnimeFormat.OVA;
-
       case 'ONA':
         return AnimeFormat.ONA;
-
       case 'MUSIC':
         return AnimeFormat.MUSIC;
-
       default:
         return null;
     }
@@ -277,9 +251,7 @@ export class AnilistService {
     try {
       body = (await response.json()) as AniListResponse<T>;
     } catch {
-      throw new BadGatewayException(
-        'Invalid JSON response from AniList',
-      );
+      throw new BadGatewayException('Invalid JSON response from AniList');
     }
 
     if (body.errors?.length) {
@@ -289,9 +261,7 @@ export class AnilistService {
     }
 
     if (!body.data) {
-      throw new BadGatewayException(
-        'AniList returned no data',
-      );
+      throw new BadGatewayException('AniList returned no data');
     }
 
     return body.data;

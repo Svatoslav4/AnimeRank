@@ -1,4 +1,5 @@
-import {Injectable,NotFoundException,} from '@nestjs/common';
+
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service.js';
 import { CreateAnimeDto } from './dto/create-anime.dto.js';
 import { QueryAnimeDto } from './dto/query-anime-dto.js';
@@ -26,12 +27,25 @@ export class AnimeService {
   }
 
   async findAll(query: QueryAnimeDto) {
-    const { search,format,status,genre,year,page = 1,limit = 20, } = query;
+    const {
+      search,
+      format,
+      status,
+      genre,
+      year,
+      page = 1,
+      limit = 20,
+    } = query;
 
     const where = {
       ...(search && {
         OR: [
-          { title: { contains: search, mode: 'insensitive' as const } },
+          {
+            title: {
+              contains: search,
+              mode: 'insensitive' as const,
+            },
+          },
           {
             englishTitle: {
               contains: search,
